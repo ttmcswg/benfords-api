@@ -1,0 +1,32 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          touch .env
+          echo RAPID_API_KEY=$RAPID_API_KEY >> .env
+        env:
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+
+      - name: Build and run tests
+        run: |
+          docker build -t benfords-api .
+          docker run --rm benfords-api npm test
+
+      - name: Run linting
+        run: |
+          docker run --rm benfords-api npm run lint
+
